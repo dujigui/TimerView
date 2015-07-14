@@ -10,15 +10,15 @@
 
 ----
 
-控件长这样
+控件长这样，下方的button不属于这个控件
 
-![屏幕截图，下方的button不属于这个控件](/read_me/screen_shot.jpg)
+![屏幕截图](/read_me/screen_shot.jpg)
 
 
 
 在把它弄上jCenter之前，如果你想使用或者修改这个控件的话，
 
-下载[MyTimer.java](MyTimer.java)，复制到你的项目里面，就可以使用或者修改了～
+下载[MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java)，复制到你的项目里面，就可以使用或者修改了～
 
 
-![gif图，加载好慢...](https://github.com/pheynix/TimerView/blob/master/read_me/screen_record.gif)
+![gif图，加载好慢...](/read_me/screen_record.gif)
