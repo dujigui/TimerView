@@ -12,7 +12,7 @@
 
 控件长这样
 
-![屏幕截图，下方的button不属于这个控件](screen_shot.jpg)
+![屏幕截图，下方的button不属于这个控件](/read_me/screen_shot.jpg)
 
 
 
@@ -21,4 +21,4 @@
 下载[MyTimer.java](MyTimer.java)，复制到你的项目里面，就可以使用或者修改了～
 
 
-![gif图，加载好慢...](screen_record.gif)
+![gif图，加载好慢...](https://github.com/pheynix/TimerView/blob/master/read_me/screen_record.gif)
