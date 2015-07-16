@@ -19,23 +19,36 @@ import java.util.TimerTask;
 
 /**
  * Created by pheynix on 7/12/15.
+ *
+ * Sorry for my English...
  */
 public class MyTimer extends View {
 
+    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
+    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
+    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
+
+    //use this in Log,saving lots of time;
+    //在打Log的时候使用，节约时间
     private static final String tag = "pheynix";
-    private static final String msg = ">>>>>>>>>>>>>>>>>>>>>>我运行了<<<<<<<<<<<<<<<<<<<<<<<<";
+    private static final String msg = ">>>>>>>>>>>>>>>>>>>>>> LOOK AT ME <<<<<<<<<<<<<<<<<<<<<<<<";
 
     //flags
     private boolean isInitialized = false;
-    private boolean isStarted = false;
+    private boolean isStarted = false;// =true if countdown begin //倒计时开始的时候为true
     private boolean isInDragButton;
-    private int whichDragButton;//0、1、2、3 代表 不在、hour、minute、second
+    private int whichDragButton;//1==hour 2==minute 3==second
 
-    //倒计时剩余时间
+    //store time,calculate result when countdown pause/stop
+    //保存时间，倒计时结束时计算时间差
     private Calendar timeStart;
     private Calendar timeRemain;
 
-    //尺寸
+    //dimension and coordinate
+    //尺寸和坐标
     private float viewWidth;
     private float viewHeight;
     private float circleRadiusHour;
@@ -64,7 +77,7 @@ public class MyTimer extends View {
     private float[] defaultDragButtonMinutePosition;
     private float[] defaultDragButtonSecondPosition;
 
-    //画笔
+    //paint
     private Paint paintCircleBackground;
     private Paint paintDragButton;
     private Paint paintHour;
@@ -73,12 +86,15 @@ public class MyTimer extends View {
     private Paint paintNumber;
     private Paint paintGlowEffect;
 
+    //color
     private static final int colorDefault = 0xFFD6D6D6;
     private static final int colorHour = 0xFF9AD13C;
     private static final int colorMinute = 0xFFA55F7C;
     private static final int colorSecond = 0xFF00BCD4;
-    private static final int colorDragButton = 0x40000000;
 
+    private OnTimeChangeListener timeChangeListener;
+
+    //initialize every thing
     //初始化
     private void initialize(Canvas canvas) {
 
@@ -90,6 +106,8 @@ public class MyTimer extends View {
         viewWidth = canvas.getWidth();
         viewHeight = canvas.getHeight();
 
+        //use different dimension in high resolution device
+        //保证高分辨率屏幕有比较好的显示效果
         if (viewWidth > 720){
             strokeWidth = 30;
             circleRadiusDragButton = 50;
@@ -151,18 +169,21 @@ public class MyTimer extends View {
         paintNumber.setStrokeWidth(2);
         paintNumber.setStyle(Paint.Style.FILL);
         paintNumber.setAntiAlias(true);
+
+        //draw glow effect on the end of arc,glow-effect == dragButton
+        //用于绘制圆弧尽头的辉光效果,辉光区域就是dragButton的区域
         paintGlowEffect.setMaskFilter(new BlurMaskFilter(2*strokeWidth/3, BlurMaskFilter.Blur.NORMAL));
         paintGlowEffect.setStrokeWidth(strokeWidth);
         paintGlowEffect.setAntiAlias(true);
         paintGlowEffect.setStyle(Paint.Style.FILL);
 
-        isInitialized = true;
     }
 
     public MyTimer(Context context) {
         super(context);
     }
 
+    //use this view in .xml file will invoke this constructor
     //在.xml中使用此控件时调用此构造函数
     public MyTimer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -177,19 +198,28 @@ public class MyTimer extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        //初始化尺寸
+        //initialize dimension and coordinate just for once
+        //初始化尺寸，只会调用一次
         if (!isInitialized) {
             initialize(canvas);
+            isInitialized = true;
         }
 
+        //arc and number depending on degree,update before drawing
+        //角度决定圆弧长度和数字，每次重绘前先更新角度
         if (isStarted){
             updateDegree();
         }
 
+
+        //draw background circle
+        //画背景的圆圈
         canvas.drawCircle(centerXHour, centerYHour, circleRadiusHour, paintCircleBackground);
         canvas.drawCircle(centerXMinute, centerYMinute, circleRadiusMinute, paintCircleBackground);
         canvas.drawCircle(centerXSecond, centerYSecond, circleRadiusSecond, paintCircleBackground);
 
+        //draw arc
+        //画弧形
         RectF rectFHour = new RectF(centerXHour - circleRadiusHour, centerYHour - circleRadiusHour
                 , centerXHour + circleRadiusHour, centerYHour + circleRadiusHour);
         RectF rectFMinute = new RectF(centerXMinute - circleRadiusMinute, centerYMinute - circleRadiusMinute
@@ -201,6 +231,9 @@ public class MyTimer extends View {
         canvas.drawArc(rectFMinute, -90, currentDegreeMinute, false, paintMinute);
         canvas.drawArc(rectFSecond, -90, currentDegreeSecond, false, paintSecond);
 
+
+        //draw glow effect
+        //画辉光效果
         paintDragButton.setColor(colorHour);
         canvas.drawCircle(dragButtonHourPosition[0],dragButtonHourPosition[1],strokeWidth/2,paintDragButton);
         paintGlowEffect.setColor(colorHour);
@@ -217,6 +250,8 @@ public class MyTimer extends View {
         canvas.drawCircle(dragButtonSecondPosition[0],dragButtonSecondPosition[1],strokeWidth,paintGlowEffect);
 
 
+        //draw letter "H""M""S",point(0,0) of text area is on the bottom-left of this area！
+        //画"H""M""S"这三个字母，文字区域的(0,0)在左下角！
         getDisplayNumber();
         Rect rect = new Rect();
 
@@ -242,15 +277,21 @@ public class MyTimer extends View {
         canvas.drawText("S",centerXSecond+50,centerYSecond+25,paintNumber);
     }
 
+
+    //handle touch event
+    //
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
 
         switch (event.getAction()) {
+            //whether touch in the drag button or not
             //判断点击是否在dragButton内
             case MotionEvent.ACTION_DOWN:
                 isInDragButton(event.getX(), event.getY());
                 break;
+
+            //update coordination of dragButton
             //更新dragButton的位置
             case MotionEvent.ACTION_MOVE:
                 if (!isStarted){
@@ -278,6 +319,7 @@ public class MyTimer extends View {
                     }
                 }
                 break;
+
             case MotionEvent.ACTION_UP:
                 isInDragButton = false;
                 break;
@@ -286,10 +328,13 @@ public class MyTimer extends View {
         return true;
     }
 
+    //update degree,depend on the path user dragging on the screen
+    //根据用户在屏幕划过的轨迹更新角度
     private float getDegree(float eventX, float eventY, float centerX, float centerY) {
 
         //    http://stackoverflow.com/questions/7926816/calculate-angle-of-touched-point-and-rotate-it-in-android
         //    Math has defeated me once again.So sad...
+        //    卧槽...
         double tx = eventX - centerX;
         double ty = eventY - centerY;
         double t_length = Math.sqrt(tx * tx + ty * ty);
@@ -334,19 +379,21 @@ public class MyTimer extends View {
         }
     }
 
+
+    //degree depending on timeRemain
+    //角度由剩余时间决定
     private void updateDegree() {
 
         currentDegreeHour = (float)((timeRemain.get(Calendar.HOUR_OF_DAY)*60+timeRemain.get(Calendar.MINUTE))/(6.0*60))*360;
-//        currentDegreeMinute = (float)(timeRemain.get(Calendar.MINUTE)/60.0)*360;
         currentDegreeMinute = (float)((timeRemain.get(Calendar.MINUTE)*60+timeRemain.get(Calendar.SECOND))/(60.0*60))*360;
-//        currentDegreeSecond = (float)(timeRemain.get(Calendar.SECOND)/60.0)*360;
         currentDegreeSecond = (float)((timeRemain.get(Calendar.SECOND)*1000+timeRemain.get(Calendar.MILLISECOND))/(60.0*1000))*360;
-
 
         updateDragButtonPosition(0);
 
     }
 
+    //update drag button position(glow effect area)
+    //更新拖动按钮中心点（辉光效果区域）
     private void updateDragButtonPosition(int flag){
 
         switch (flag){
@@ -376,6 +423,9 @@ public class MyTimer extends View {
 
     }
 
+
+    //get the time from currentDegree and store it in timeStart and timeRemain
+    //从当前的角度获取时间，保存到timeStart和timeRemain
     private void updateTime(int flag){
 
         switch (flag){
@@ -405,20 +455,29 @@ public class MyTimer extends View {
 
     }
 
+
+    //common Timer-TimerTask-Handler countdown solution
+    //常见的Timer-TimerTask-Handler倒计时模式
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
             switch (msg.what) {
-                //可以开始倒计时
+                //countdown running
+                //可以倒计时
                 case 1:
 
-//                    timeRemain.add(Calendar.SECOND, -1);
                     timeRemain.add(Calendar.MILLISECOND,-100);
+
+                    if (timeChangeListener != null){
+                        timeChangeListener.onTimeChange(timeStart.getTimeInMillis(),timeRemain.getTimeInMillis());
+                    }
+
                     invalidate();
 
                     break;
+                //countdown stop
                 //时间为空，停止倒计时，提示用户
                 case 2:
                     isStarted = false;
@@ -429,8 +488,9 @@ public class MyTimer extends View {
     };
 
     Timer timer = new Timer(true);
-
     TimerTask timerTask;
+
+
 
     public boolean start() {
         if (!isTimeEmpty() && !isStarted) {
@@ -442,19 +502,20 @@ public class MyTimer extends View {
                         Message message = new Message();
                         message.what = 1;
                         mHandler.sendMessage(message);
-//                        Log.e(tag, "剩余时间" + timeRemain.get(Calendar.SECOND) + "秒");
                     } else {
                         Message message = new Message();
                         message.what = 2;
                         mHandler.sendMessage(message);
-//                        Log.e(tag,"剩余时间"+timeRemain.get(Calendar.SECOND)+"秒");
                     }
                 }
             };
 
-//            timer.schedule(timerTask, 1000, 1000);
             timer.schedule(timerTask, 1000, 100);
             isStarted = true;
+
+            if (timeChangeListener != null){
+                timeChangeListener.onTimerStart(timeStart.getTimeInMillis());
+            }
 
             return true;
         } else {
@@ -462,29 +523,57 @@ public class MyTimer extends View {
         }
     }
 
+    private boolean isTimeEmpty() {
+        if (timeRemain.get(Calendar.HOUR_OF_DAY) != 0
+                || timeRemain.get(Calendar.MINUTE) != 0
+                || timeRemain.get(Calendar.SECOND) != 0
+                || timeRemain.get(Calendar.MILLISECOND) != 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
     public long stop() {
         timerTask.cancel();
         isStarted = false;
+
+        if (timeChangeListener != null){
+            timeChangeListener.onTimeStop(timeStart.getTimeInMillis(),timeRemain.getTimeInMillis());
+        }
+
         return timeStart.getTimeInMillis() - timeRemain.getTimeInMillis();
     }
+
 
     public Calendar getTimeStart(){
         return timeStart;
     }
 
+
     public Calendar getTimeRemaid(){
         return timeRemain;
     }
+
 
     public long getTimePass(){
         return timeStart.getTimeInMillis() - timeRemain.getTimeInMillis();
     }
 
-    private boolean isTimeEmpty() {
-        if (timeRemain.get(Calendar.HOUR_OF_DAY) != 0 || timeRemain.get(Calendar.MINUTE) != 0 || timeRemain.get(Calendar.SECOND) != 0 || timeRemain.get(Calendar.MILLISECOND) != 0) {
-            return false;
-        } else {
-            return true;
+
+    public void setOnTimeChangeListener(OnTimeChangeListener listener){
+        if (listener != null){
+            timeChangeListener = listener;
         }
     }
+
+
+    //listener
+    public interface OnTimeChangeListener{
+        public void onTimerStart(long timeStart);
+        public void onTimeChange(long timeStart,long timeRemain);
+        public void onTimeStop(long timeStart,long timeRemain);
+    }
+
 }
