@@ -32,7 +32,7 @@ Maybe tomorrow...
 <br/>
 It looks like this,buttons doesn't belong to this view
 
-![screen shot](/read_me/screen_shot.jpg)
+![screen shot](/read_me/screen_shot.png)
 
 
 <br/><br/>
