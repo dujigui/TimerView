@@ -14,7 +14,6 @@ If you need the glow effect,please [DISABLE](http://developer.android.com/guide/
 
 
 
-----
 
 ## Summary
 <br/>
@@ -27,7 +26,7 @@ I don't have enough time(kown how) to upload it onto jCenter
 Maybe tomorrow...
 
 
-----
+
 
 ## Screen shot
 <br/>
@@ -49,10 +48,10 @@ Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),c
 👆👆👆👆👆👆👆👆👆👆here is a gif picture,wait or refresh👆👆👆👆👆👆👆👆👆👆
 
 
-----
 
 
-Change Log:
+
+## Change Log
 
 
 * 20150716 add listener,add English remark
