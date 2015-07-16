@@ -119,21 +119,21 @@ public class MyTimer extends View {
             circleRadiusDragButton = 25;
         }
 
-        circleRadiusHour = viewWidth / 5;
-        circleRadiusMinute = viewWidth / 4;
-        circleRadiusSecond = viewWidth / 5;
+        circleRadiusHour = viewWidth / 6;
+        circleRadiusMinute = viewWidth / 3;
+        circleRadiusSecond = viewWidth / 6;
         currentDegreeHour = 0;
         currentDegreeMinute = 0;
         currentDegreeSecond = 0;
         displayNumberHour = "0";
         displayNumberMinute = "0";
         displayNumberSecond = "0";
-        centerXHour = viewWidth / 4;
-        centerYHour = 3 * viewWidth / 4;
+        centerXHour = viewWidth / 6 + strokeWidth/2 + circleRadiusDragButton/2;
+        centerYHour = viewHeight / 6 + strokeWidth/2 + circleRadiusDragButton/2;
         centerXMinute = viewWidth / 2;
-        centerYMinute = viewWidth / 4 + strokeWidth / 2 + viewWidth / 32;
-        centerXSecond = 3 * viewWidth / 4;
-        centerYSecond = 3 * viewWidth / 4;
+        centerYMinute = 2*viewHeight / 3 - strokeWidth;
+        centerXSecond = 5 * viewWidth / 6 - strokeWidth/2 - circleRadiusDragButton/2;
+        centerYSecond = viewHeight / 6 + strokeWidth/2 + circleRadiusDragButton/2;
 
         defaultDragButtonHourPosition = new float[]{centerXHour, centerYHour - circleRadiusHour};
         defaultDragButtonMinutePosition = new float[]{centerXMinute, centerYMinute - circleRadiusMinute};

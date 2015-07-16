@@ -6,6 +6,7 @@
 ## 重要的事情
 <br/>
 由于使用了MakskFilter，辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
+由于使用了MaskFilter，辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
 
 由于使用了MakskFilter，辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
 
