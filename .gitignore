@@ -1,7 +1,18 @@
-.gradle
+# general stuff
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
-/build
 /captures
+
+# vim related
+*.swp
+
+# gradle related
+.gradle
+gradle/
+build/
+gradlew
+gradlew.bat
+
+# Intellij related
+*.iml
+.idea
