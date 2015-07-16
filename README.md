@@ -21,7 +21,9 @@
 下载[MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java)，复制到你的项目里面，就可以使用或者修改了～
 
 一个很重要的事情：辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
+
 一个很重要的事情：辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
+
 一个很重要的事情：辉光效果必须[关闭硬件加速](http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/)！！
 
 
