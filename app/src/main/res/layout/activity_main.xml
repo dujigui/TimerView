@@ -3,15 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity"
-    android:weightSum="1">
+    tools:context=".MainActivity">
 
     <com.pheynix.forthewatch.MyTimer
         android:id="@+id/timer"
         android:layout_width="match_parent"
-        android:layout_height="383dp"
-        android:layerType="software"
-        android:layout_weight="0.41" />
+        android:layout_height="wrap_content"
+        android:layerType="software"/>
 
     <LinearLayout
         android:layout_width="match_parent"

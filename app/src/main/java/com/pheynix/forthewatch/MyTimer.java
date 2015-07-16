@@ -19,22 +19,22 @@ import java.util.TimerTask;
 
 /**
  * Created by pheynix on 7/12/15.
- *
  * Sorry for my English...
+ *
+ *Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+ *Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+ *Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
+ *如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
+ *如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
+ *如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
  */
 public class MyTimer extends View {
-
-    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
-    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
-    //Disable hardware accelerate if you need the glow effect,See: http://developer.android.com/guide/topics/graphics/hardware-accel.html
-    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
-    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
-    //如果需要辉光效果，请务必关闭硬件加速，参考： http://blog.chenming.info/blog/2012/09/18/android-hardware-accel/
 
     //use this in Log,saving lots of time;
     //在打Log的时候使用，节约时间
     private static final String tag = "pheynix";
     private static final String msg = ">>>>>>>>>>>>>>>>>>>>>> LOOK AT ME <<<<<<<<<<<<<<<<<<<<<<<<";
+
 
     //flags
     private boolean isInitialized = false;
@@ -91,6 +91,9 @@ public class MyTimer extends View {
     private static final int colorHour = 0xFF9AD13C;
     private static final int colorMinute = 0xFFA55F7C;
     private static final int colorSecond = 0xFF00BCD4;
+
+    private static final int DEFAULT_VIEW_WIDTH = 720;
+    private static final int DEFAULT_VIEW_HEIGHT = 720;
 
     private OnTimeChangeListener timeChangeListener;
 
@@ -327,6 +330,41 @@ public class MyTimer extends View {
 
         return true;
     }
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int width  = getDimension(DEFAULT_VIEW_WIDTH, widthMeasureSpec);
+        int height = getDimension(width, heightMeasureSpec);
+
+        viewWidth = width;
+        viewHeight = height;
+
+        setMeasuredDimension(width, height);
+    }
+
+    private int getDimension(int defaultDimension,int measureSpec){
+
+        int result;
+
+        switch (MeasureSpec.getMode(measureSpec)){
+            case MeasureSpec.EXACTLY:
+                result = MeasureSpec.getSize(measureSpec);
+                break;
+            case MeasureSpec.AT_MOST:
+                result = Math.min(defaultDimension,MeasureSpec.getSize(measureSpec));
+
+                break;
+            default:
+                result = defaultDimension;
+                break;
+        }
+        return result;
+    }
+
+
 
     //update degree,depend on the path user dragging on the screen
     //根据用户在屏幕划过的轨迹更新角度
