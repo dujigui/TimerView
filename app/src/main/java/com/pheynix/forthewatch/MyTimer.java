@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -96,11 +97,18 @@ public class MyTimer extends View {
     private static final int DEFAULT_VIEW_HEIGHT = 720;
 
     private OnTimeChangeListener timeChangeListener;
+    private OnMinChangListener minChangListener;
+    private OnHourChangListener hourChangListener;
+    private OnSecondChangListener secondChangListener;
+    private OnInitialFinishListener initialFinishListener;
+    //add model by Swifty default timer
+    private Model model = Model.Timer;
+    private boolean maxTime;
 
     //initialize every thing
     //初始化
     private void initialize(Canvas canvas) {
-
+        Log.e("aa", "init");
         timeRemain = Calendar.getInstance();
         timeStart = Calendar.getInstance();
         timeStart.clear();
@@ -111,10 +119,10 @@ public class MyTimer extends View {
 
         //use different dimension in high resolution device
         //保证高分辨率屏幕有比较好的显示效果
-        if (viewWidth > 720){
+        if (viewWidth > 720) {
             strokeWidth = 30;
             circleRadiusDragButton = 50;
-        }else {
+        } else {
             strokeWidth = 15;
             circleRadiusDragButton = 25;
         }
@@ -175,11 +183,15 @@ public class MyTimer extends View {
 
         //draw glow effect on the end of arc,glow-effect == dragButton
         //用于绘制圆弧尽头的辉光效果,辉光区域就是dragButton的区域
-        paintGlowEffect.setMaskFilter(new BlurMaskFilter(2*strokeWidth/3, BlurMaskFilter.Blur.NORMAL));
+        paintGlowEffect.setMaskFilter(new BlurMaskFilter(2 * strokeWidth / 3, BlurMaskFilter.Blur.NORMAL));
         paintGlowEffect.setStrokeWidth(strokeWidth);
         paintGlowEffect.setAntiAlias(true);
         paintGlowEffect.setStyle(Paint.Style.FILL);
 
+        //完成初始化回调
+        if (initialFinishListener != null) {
+            initialFinishListener.onInitialFinishListener();
+        }
     }
 
     public MyTimer(Context context) {
@@ -210,7 +222,7 @@ public class MyTimer extends View {
 
         //arc and number depending on degree,update before drawing
         //角度决定圆弧长度和数字，每次重绘前先更新角度
-        if (isStarted){
+        if (isStarted) {
             updateDegree();
         }
 
@@ -238,19 +250,19 @@ public class MyTimer extends View {
         //draw glow effect
         //画辉光效果
         paintDragButton.setColor(colorHour);
-        canvas.drawCircle(dragButtonHourPosition[0],dragButtonHourPosition[1],strokeWidth/2,paintDragButton);
+        canvas.drawCircle(dragButtonHourPosition[0], dragButtonHourPosition[1], strokeWidth / 2, paintDragButton);
         paintGlowEffect.setColor(colorHour);
-        canvas.drawCircle(dragButtonHourPosition[0],dragButtonHourPosition[1],strokeWidth,paintGlowEffect);
+        canvas.drawCircle(dragButtonHourPosition[0], dragButtonHourPosition[1], strokeWidth, paintGlowEffect);
 
         paintDragButton.setColor(colorMinute);
-        canvas.drawCircle(dragButtonMinutePosition[0],dragButtonMinutePosition[1],strokeWidth/2,paintDragButton);
+        canvas.drawCircle(dragButtonMinutePosition[0], dragButtonMinutePosition[1], strokeWidth / 2, paintDragButton);
         paintGlowEffect.setColor(colorMinute);
-        canvas.drawCircle(dragButtonMinutePosition[0],dragButtonMinutePosition[1],strokeWidth,paintGlowEffect);
+        canvas.drawCircle(dragButtonMinutePosition[0], dragButtonMinutePosition[1], strokeWidth, paintGlowEffect);
 
         paintDragButton.setColor(colorSecond);
-        canvas.drawCircle(dragButtonSecondPosition[0],dragButtonSecondPosition[1],strokeWidth/2,paintDragButton);
+        canvas.drawCircle(dragButtonSecondPosition[0], dragButtonSecondPosition[1], strokeWidth / 2, paintDragButton);
         paintGlowEffect.setColor(colorSecond);
-        canvas.drawCircle(dragButtonSecondPosition[0],dragButtonSecondPosition[1],strokeWidth,paintGlowEffect);
+        canvas.drawCircle(dragButtonSecondPosition[0], dragButtonSecondPosition[1], strokeWidth, paintGlowEffect);
 
 
         //draw letter "H""M""S",point(0,0) of text area is on the bottom-left of this area！
@@ -260,24 +272,24 @@ public class MyTimer extends View {
 
         paintNumber.setTextSize(70);
         paintNumber.setColor(colorHour);
-        paintNumber.getTextBounds(displayNumberHour,0,displayNumberHour.length(),rect);
-        canvas.drawText(displayNumberHour,centerXHour-rect.width()/2,centerYHour+rect.height()/2,paintNumber);
+        paintNumber.getTextBounds(displayNumberHour, 0, displayNumberHour.length(), rect);
+        canvas.drawText(displayNumberHour, centerXHour - rect.width() / 2, centerYHour + rect.height() / 2, paintNumber);
         paintNumber.setTextSize(25);
-        canvas.drawText("H",centerXHour+30,centerYHour+25,paintNumber);
+        canvas.drawText("H", centerXHour + 30, centerYHour + 25, paintNumber);
 
         paintNumber.setTextSize(70);
         paintNumber.setColor(colorMinute);
-        paintNumber.getTextBounds(displayNumberMinute,0,displayNumberMinute.length(),rect);
-        canvas.drawText(displayNumberMinute,centerXMinute-rect.width()/2,centerYMinute+rect.height()/2,paintNumber);
+        paintNumber.getTextBounds(displayNumberMinute, 0, displayNumberMinute.length(), rect);
+        canvas.drawText(displayNumberMinute, centerXMinute - rect.width() / 2, centerYMinute + rect.height() / 2, paintNumber);
         paintNumber.setTextSize(25);
-        canvas.drawText("M",centerXMinute+50,centerYMinute+25,paintNumber);
+        canvas.drawText("M", centerXMinute + 50, centerYMinute + 25, paintNumber);
 
         paintNumber.setTextSize(70);
         paintNumber.setColor(colorSecond);
-        paintNumber.getTextBounds(displayNumberSecond,0,displayNumberSecond.length(),rect);
-        canvas.drawText(displayNumberSecond,centerXSecond-rect.width()/2,centerYSecond+rect.height()/2,paintNumber);
+        paintNumber.getTextBounds(displayNumberSecond, 0, displayNumberSecond.length(), rect);
+        canvas.drawText(displayNumberSecond, centerXSecond - rect.width() / 2, centerYSecond + rect.height() / 2, paintNumber);
         paintNumber.setTextSize(25);
-        canvas.drawText("S",centerXSecond+50,centerYSecond+25,paintNumber);
+        canvas.drawText("S", centerXSecond + 50, centerYSecond + 25, paintNumber);
     }
 
 
@@ -297,7 +309,7 @@ public class MyTimer extends View {
             //update coordination of dragButton
             //更新dragButton的位置
             case MotionEvent.ACTION_MOVE:
-                if (!isStarted){
+                if (!isStarted) {
                     if (isInDragButton) {
                         switch (whichDragButton) {
                             case 1:
@@ -376,20 +388,36 @@ public class MyTimer extends View {
         double tx = eventX - centerX;
         double ty = eventY - centerY;
         double t_length = Math.sqrt(tx * tx + ty * ty);
-        double a = Math.acos(ty/t_length);
-        float degree = 180 - (float)Math.toDegrees(a);
+        double a = Math.acos(ty / t_length);
+        float degree = 180 - (float) Math.toDegrees(a);
 
-        if (centerX > eventX){
-            degree = 180 + (float)Math.toDegrees(a);
+        if (centerX > eventX) {
+            degree = 180 + (float) Math.toDegrees(a);
         }
 
         return degree;
     }
 
-    private void getDisplayNumber(){
-        displayNumberHour = timeRemain.get(Calendar.HOUR_OF_DAY) + "";
-        displayNumberMinute = timeRemain.get(Calendar.MINUTE) + "";
-        displayNumberSecond = timeRemain.get(Calendar.SECOND) + "";
+    private void getDisplayNumber() {
+        if (Integer.valueOf(displayNumberHour) != timeRemain.get(Calendar.HOUR_OF_DAY)) {
+            displayNumberHour = timeRemain.get(Calendar.HOUR_OF_DAY) + "";
+            if (hourChangListener != null) {
+                hourChangListener.onHourChange(timeRemain.get(Calendar.HOUR_OF_DAY));
+            }
+        }
+        if (Integer.valueOf(displayNumberMinute) != timeRemain.get(Calendar.MINUTE)) {
+            displayNumberMinute = timeRemain.get(Calendar.MINUTE) + "";
+            if (minChangListener != null) {
+                minChangListener.onMinChange(timeRemain.get(Calendar.MINUTE));
+            }
+        }
+        if (Integer.valueOf(displayNumberSecond) != timeRemain.get(Calendar.SECOND)) {
+            displayNumberSecond = timeRemain.get(Calendar.SECOND) + "";
+            if (secondChangListener != null) {
+                secondChangListener.onSecondChange(timeRemain.get(Calendar.SECOND));
+            }
+        }
+
     }
 
 
@@ -422,9 +450,9 @@ public class MyTimer extends View {
     //角度由剩余时间决定
     private void updateDegree() {
 
-        currentDegreeHour = (float)((timeRemain.get(Calendar.HOUR_OF_DAY)*60+timeRemain.get(Calendar.MINUTE))/(6.0*60))*360;
-        currentDegreeMinute = (float)((timeRemain.get(Calendar.MINUTE)*60+timeRemain.get(Calendar.SECOND))/(60.0*60))*360;
-        currentDegreeSecond = (float)((timeRemain.get(Calendar.SECOND)*1000+timeRemain.get(Calendar.MILLISECOND))/(60.0*1000))*360;
+        currentDegreeHour = (float) ((timeRemain.get(Calendar.HOUR_OF_DAY) * 60 + timeRemain.get(Calendar.MINUTE)) / (6.0 * 60)) * 360;
+        currentDegreeMinute = (float) ((timeRemain.get(Calendar.MINUTE) * 60 + timeRemain.get(Calendar.SECOND)) / (60.0 * 60)) * 360;
+        currentDegreeSecond = (float) ((timeRemain.get(Calendar.SECOND) * 1000 + timeRemain.get(Calendar.MILLISECOND)) / (60.0 * 1000)) * 360;
 
         updateDragButtonPosition(0);
 
@@ -432,30 +460,30 @@ public class MyTimer extends View {
 
     //update drag button position(glow effect area)
     //更新拖动按钮中心点（辉光效果区域）
-    private void updateDragButtonPosition(int flag){
+    private void updateDragButtonPosition(int flag) {
 
-        switch (flag){
+        switch (flag) {
             case 0:
-                dragButtonHourPosition[0] = (float)(centerXHour + circleRadiusHour*(Math.sin(Math.toRadians(currentDegreeHour))));
-                dragButtonHourPosition[1] = (float)(centerYHour - circleRadiusHour*(Math.cos(Math.toRadians(currentDegreeHour))));
+                dragButtonHourPosition[0] = (float) (centerXHour + circleRadiusHour * (Math.sin(Math.toRadians(currentDegreeHour))));
+                dragButtonHourPosition[1] = (float) (centerYHour - circleRadiusHour * (Math.cos(Math.toRadians(currentDegreeHour))));
 
-                dragButtonMinutePosition[0] = (float)(centerXMinute + circleRadiusMinute*Math.sin(Math.toRadians(currentDegreeMinute)));
-                dragButtonMinutePosition[1] = (float)(centerYMinute - circleRadiusMinute*Math.cos(Math.toRadians(currentDegreeMinute)));
+                dragButtonMinutePosition[0] = (float) (centerXMinute + circleRadiusMinute * Math.sin(Math.toRadians(currentDegreeMinute)));
+                dragButtonMinutePosition[1] = (float) (centerYMinute - circleRadiusMinute * Math.cos(Math.toRadians(currentDegreeMinute)));
 
-                dragButtonSecondPosition[0] = (float)(centerXSecond + circleRadiusSecond*Math.sin(Math.toRadians(currentDegreeSecond)));
-                dragButtonSecondPosition[1] = (float)(centerYSecond - circleRadiusSecond*Math.cos(Math.toRadians(currentDegreeSecond)));
+                dragButtonSecondPosition[0] = (float) (centerXSecond + circleRadiusSecond * Math.sin(Math.toRadians(currentDegreeSecond)));
+                dragButtonSecondPosition[1] = (float) (centerYSecond - circleRadiusSecond * Math.cos(Math.toRadians(currentDegreeSecond)));
                 break;
             case 1:
-                dragButtonHourPosition[0] = (float)(centerXHour + circleRadiusHour*(Math.sin(Math.toRadians(currentDegreeHour))));
-                dragButtonHourPosition[1] = (float)(centerYHour - circleRadiusHour*(Math.cos(Math.toRadians(currentDegreeHour))));
+                dragButtonHourPosition[0] = (float) (centerXHour + circleRadiusHour * (Math.sin(Math.toRadians(currentDegreeHour))));
+                dragButtonHourPosition[1] = (float) (centerYHour - circleRadiusHour * (Math.cos(Math.toRadians(currentDegreeHour))));
                 break;
             case 2:
-                dragButtonMinutePosition[0] = (float)(centerXMinute + circleRadiusMinute*Math.sin(Math.toRadians(currentDegreeMinute)));
-                dragButtonMinutePosition[1] = (float)(centerYMinute - circleRadiusMinute*Math.cos(Math.toRadians(currentDegreeMinute)));
+                dragButtonMinutePosition[0] = (float) (centerXMinute + circleRadiusMinute * Math.sin(Math.toRadians(currentDegreeMinute)));
+                dragButtonMinutePosition[1] = (float) (centerYMinute - circleRadiusMinute * Math.cos(Math.toRadians(currentDegreeMinute)));
                 break;
             case 3:
-                dragButtonSecondPosition[0] = (float)(centerXSecond + circleRadiusSecond*Math.sin(Math.toRadians(currentDegreeSecond)));
-                dragButtonSecondPosition[1] = (float)(centerYSecond - circleRadiusSecond*Math.cos(Math.toRadians(currentDegreeSecond)));
+                dragButtonSecondPosition[0] = (float) (centerXSecond + circleRadiusSecond * Math.sin(Math.toRadians(currentDegreeSecond)));
+                dragButtonSecondPosition[1] = (float) (centerYSecond - circleRadiusSecond * Math.cos(Math.toRadians(currentDegreeSecond)));
                 break;
         }
 
@@ -464,30 +492,30 @@ public class MyTimer extends View {
 
     //get the time from currentDegree and store it in timeStart and timeRemain
     //从当前的角度获取时间，保存到timeStart和timeRemain
-    private void updateTime(int flag){
+    private void updateTime(int flag) {
 
-        switch (flag){
+        switch (flag) {
             case 0:
-                timeStart.set(Calendar.HOUR_OF_DAY,(int)Math.floor(6*currentDegreeHour/360));
-                timeRemain.set(Calendar.HOUR_OF_DAY,(int)Math.floor(6*currentDegreeHour/360));
+                timeStart.set(Calendar.HOUR_OF_DAY, (int) Math.floor(6 * currentDegreeHour / 360));
+                timeRemain.set(Calendar.HOUR_OF_DAY, (int) Math.floor(6 * currentDegreeHour / 360));
 
-                timeStart.set(Calendar.MINUTE,(int)Math.floor(60*currentDegreeMinute/360));
-                timeRemain.set(Calendar.MINUTE,(int)Math.floor(60*currentDegreeMinute/360));
+                timeStart.set(Calendar.MINUTE, (int) Math.floor(60 * currentDegreeMinute / 360));
+                timeRemain.set(Calendar.MINUTE, (int) Math.floor(60 * currentDegreeMinute / 360));
 
-                timeStart.set(Calendar.SECOND,(int)Math.floor(60*currentDegreeSecond/360));
-                timeRemain.set(Calendar.SECOND,(int)Math.floor(60*currentDegreeSecond/360));
+                timeStart.set(Calendar.SECOND, (int) Math.floor(60 * currentDegreeSecond / 360));
+                timeRemain.set(Calendar.SECOND, (int) Math.floor(60 * currentDegreeSecond / 360));
                 break;
             case 1:
-                timeStart.set(Calendar.HOUR_OF_DAY,(int)Math.floor(6*currentDegreeHour/360));
-                timeRemain.set(Calendar.HOUR_OF_DAY,(int)Math.floor(6*currentDegreeHour/360));
+                timeStart.set(Calendar.HOUR_OF_DAY, (int) Math.floor(6 * currentDegreeHour / 360));
+                timeRemain.set(Calendar.HOUR_OF_DAY, (int) Math.floor(6 * currentDegreeHour / 360));
                 break;
             case 2:
-                timeStart.set(Calendar.MINUTE,(int)Math.floor(60*currentDegreeMinute/360));
-                timeRemain.set(Calendar.MINUTE,(int)Math.floor(60*currentDegreeMinute/360));
+                timeStart.set(Calendar.MINUTE, (int) Math.floor(60 * currentDegreeMinute / 360));
+                timeRemain.set(Calendar.MINUTE, (int) Math.floor(60 * currentDegreeMinute / 360));
                 break;
             case 3:
-                timeStart.set(Calendar.SECOND,(int)Math.floor(60*currentDegreeSecond/360));
-                timeRemain.set(Calendar.SECOND,(int)Math.floor(60*currentDegreeSecond/360));
+                timeStart.set(Calendar.SECOND, (int) Math.floor(60 * currentDegreeSecond / 360));
+                timeRemain.set(Calendar.SECOND, (int) Math.floor(60 * currentDegreeSecond / 360));
                 break;
         }
 
@@ -506,10 +534,10 @@ public class MyTimer extends View {
                 //可以倒计时
                 case 1:
 
-                    timeRemain.add(Calendar.MILLISECOND,-100);
+                    timeRemain.add(Calendar.MILLISECOND, -100);
 
-                    if (timeChangeListener != null){
-                        timeChangeListener.onTimeChange(timeStart.getTimeInMillis(),timeRemain.getTimeInMillis());
+                    if (timeChangeListener != null) {
+                        timeChangeListener.onTimeChange(timeStart.getTimeInMillis(), timeRemain.getTimeInMillis());
                     }
 
                     invalidate();
@@ -521,6 +549,21 @@ public class MyTimer extends View {
                     isStarted = false;
                     timerTask.cancel();
                     break;
+
+                //StopWatch running
+                case 11:
+                    timeRemain.add(Calendar.MILLISECOND, 100);
+                    if (timeChangeListener != null) {
+                        timeChangeListener.onTimeChange(timeStart.getTimeInMillis(), timeRemain.getTimeInMillis());
+                    }
+                    invalidate();
+                    break;
+                //StopWatch stop
+                //到达MAX TIME
+                case 12:
+                    isStarted = false;
+                    timerTask.cancel();
+                    break;
             }
         }
     };
@@ -529,36 +572,59 @@ public class MyTimer extends View {
     TimerTask timerTask;
 
 
-
     public boolean start() {
-        if (!isTimeEmpty() && !isStarted) {
+        if (model == Model.Timer) {
+            if (!isTimeEmpty() && !isStarted) {
 
-            timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    if (!isTimeEmpty()) {
-                        Message message = new Message();
-                        message.what = 1;
-                        mHandler.sendMessage(message);
-                    } else {
-                        Message message = new Message();
-                        message.what = 2;
-                        mHandler.sendMessage(message);
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (!isTimeEmpty()) {
+                            Message message = new Message();
+                            message.what = 1;
+                            mHandler.sendMessage(message);
+                        } else {
+                            Message message = new Message();
+                            message.what = 2;
+                            mHandler.sendMessage(message);
+                        }
+
                     }
+                };
+
+                timer.schedule(timerTask, 1000, 100);
+                isStarted = true;
+
+                if (timeChangeListener != null) {
+                    timeChangeListener.onTimerStart(timeStart.getTimeInMillis());
                 }
-            };
-
-            timer.schedule(timerTask, 1000, 100);
-            isStarted = true;
-
-            if (timeChangeListener != null){
-                timeChangeListener.onTimerStart(timeStart.getTimeInMillis());
             }
+        } else if (model == Model.StopWatch) {
+            if (!isMaxTime() && !isStarted) {
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (!isMaxTime()) {
+                            Message message = new Message();
+                            message.what = 11;
+                            mHandler.sendMessage(message);
+                        } else {
+                            Message message = new Message();
+                            message.what = 12;
+                            mHandler.sendMessage(message);
+                        }
+                    }
+                };
 
-            return true;
-        } else {
-            return false;
+                timer.schedule(timerTask, 1000, 100);
+                isStarted = true;
+
+                if (timeChangeListener != null) {
+                    timeChangeListener.onTimerStart(timeStart.getTimeInMillis());
+                }
+            }
         }
+        return isStarted;
     }
 
     private boolean isTimeEmpty() {
@@ -577,41 +643,119 @@ public class MyTimer extends View {
         timerTask.cancel();
         isStarted = false;
 
-        if (timeChangeListener != null){
-            timeChangeListener.onTimeStop(timeStart.getTimeInMillis(),timeRemain.getTimeInMillis());
+        if (timeChangeListener != null) {
+            timeChangeListener.onTimeStop(timeStart.getTimeInMillis(), timeRemain.getTimeInMillis());
         }
 
         return timeStart.getTimeInMillis() - timeRemain.getTimeInMillis();
     }
 
 
-    public Calendar getTimeStart(){
+    public Calendar getTimeStart() {
         return timeStart;
     }
 
 
-    public Calendar getTimeRemaid(){
+    public Calendar getTimeRemaid() {
         return timeRemain;
     }
 
 
-    public long getTimePass(){
+    public long getTimePass() {
         return timeStart.getTimeInMillis() - timeRemain.getTimeInMillis();
     }
 
 
-    public void setOnTimeChangeListener(OnTimeChangeListener listener){
-        if (listener != null){
+    public void setOnTimeChangeListener(OnTimeChangeListener listener) {
+        if (listener != null) {
             timeChangeListener = listener;
+        }
+    }
+
+    public void setMinChangListener(OnMinChangListener minChangListener) {
+        this.minChangListener = minChangListener;
+    }
+
+    public void setSecondChangListener(OnSecondChangListener secondChangListener) {
+        this.secondChangListener = secondChangListener;
+    }
+
+    public void setHourChangListener(OnHourChangListener hourChangListener) {
+        this.hourChangListener = hourChangListener;
+    }
+
+    public void reset() {
+        //先停止计时
+        stop();
+        //初始化calendar
+        isInitialized = false;
+        invalidate();
+    }
+
+    public boolean isMaxTime() {
+        if (timeRemain.get(Calendar.HOUR_OF_DAY) == 5
+                && timeRemain.get(Calendar.MINUTE) == 59
+                && timeRemain.get(Calendar.SECOND) == 59) {
+            return true;
+        } else {
+            return false;
         }
     }
 
 
     //listener
-    public interface OnTimeChangeListener{
+    public interface OnTimeChangeListener {
         public void onTimerStart(long timeStart);
-        public void onTimeChange(long timeStart,long timeRemain);
-        public void onTimeStop(long timeStart,long timeRemain);
+
+        public void onTimeChange(long timeStart, long timeRemain);
+
+        public void onTimeStop(long timeStart, long timeRemain);
+    }
+
+    public interface OnMinChangListener {
+        public void onMinChange(int minute);
+    }
+
+    public interface OnHourChangListener {
+        public void onHourChange(int hour);
+    }
+
+    public interface OnInitialFinishListener {
+        public void onInitialFinishListener();
+    }
+
+    public interface OnSecondChangListener {
+        public void onSecondChange(int second);
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
+
+    /**
+     * set default time
+     *
+     * @param h max 5
+     * @param m max 59
+     * @param s max 59
+     */
+    public void setStartTime(final int h, final int m, final int s) throws NumberFormatException {
+        initialFinishListener = new OnInitialFinishListener() {
+            @Override
+            public void onInitialFinishListener() {
+                if (h > 5 || m > 59 || s > 69 || h < 0 || m < 0 | s < 0) {
+                    throw new NumberFormatException("hour must in [0-5], minute and second must in [0-59]");
+                }
+                timeRemain.set(Calendar.HOUR_OF_DAY, h);
+                timeRemain.set(Calendar.MINUTE, m);
+                timeRemain.set(Calendar.SECOND, s);
+                timeStart.set(Calendar.HOUR_OF_DAY, h);
+                timeStart.set(Calendar.MINUTE, m);
+                timeStart.set(Calendar.SECOND, s);
+                updateDegree();
+                invalidate();
+            }
+        };
     }
 
 }
