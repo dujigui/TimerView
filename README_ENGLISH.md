@@ -55,6 +55,7 @@ Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),c
 
 
 * 20150716 add listener,add English remark
+* 20150717 merge fork version from @wsk900906 , add timing function,add listener
 
 
 ----
