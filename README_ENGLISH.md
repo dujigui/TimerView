@@ -19,11 +19,9 @@ If you need the glow effect,please [DISABLE](http://developer.android.com/guide/
 <br/>
 a timer view,
 
-I'm too busy(lazy),
+look at the picture below;
 
-I don't have enough time(kown how) to upload it onto jCenter
 
-Maybe tomorrow...
 
 
 
@@ -36,9 +34,8 @@ It looks like this,buttons doesn't belong to this view
 
 
 <br/><br/>
-If you need this view before I upload it onto jCenter,
 
-Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),copy it,modify it,use it,or just let it lay on you hard disk forever~
+
 
 👇👇👇👇👇👇👇👇👇👇here is a gif picture,wait or refresh👇👇👇👇👇👇👇👇👇👇
 
@@ -48,6 +45,29 @@ Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),c
 👆👆👆👆👆👆👆👆👆👆here is a gif picture,wait or refresh👆👆👆👆👆👆👆👆👆👆
 
 
+## 使用
+
+### Method 1:
+
+Add the following to your build.gradle(Project:xxxxx):
+
+```
+repositories {
+	    maven { url "https://jitpack.io" }
+}
+```
+
+Add the following to your build.gradle(Module:xxxxx):
+
+ ```
+dependencies {
+	    compile 'com.github.pheynix:TimerView:660400fb64'
+}
+```
+
+### Method 2:
+
+Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),copy it,modify it,use it,or just let it lay on you hard disk forever~
 
 
 
@@ -56,6 +76,7 @@ Locate [MyTimer.java](/app/src/main/java/com/pheynix/forthewatch/MyTimer.java),c
 
 * 20150716 add listener,add English remark
 * 20150717 merge fork version from @wsk900906 , add timing function,add listener
+* 20150719 add lib
 
 
 ----
