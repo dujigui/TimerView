@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/TimerView.iml" filepath="$PROJECT_DIR$/TimerView.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/forthewatch/forthewatch.iml" filepath="$PROJECT_DIR$/forthewatch/forthewatch.iml" />
     </modules>
   </component>
 </project>
